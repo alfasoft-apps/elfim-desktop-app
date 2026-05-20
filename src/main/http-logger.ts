@@ -5,6 +5,7 @@ import type { HttpIpcRequest } from '../shared/http-ipc';
 
 export const HTTP_LOG_FILE = 'api-http.log';
 export const PARSE_LOG_FILE = 'api-parse-error.log';
+export const UPDATER_LOG_FILE = 'auto-update.log';
 
 const MAX_BODY_CHARS = 16_384;
 
@@ -156,6 +157,14 @@ export async function appendHttpErrorLog(
 }
 
 /** JSON parse / format xətaları — `api-parse-error.log`. */
+export async function appendUpdaterLog(entry: Record<string, unknown>): Promise<void> {
+  await appendJsonLine(UPDATER_LOG_FILE, {
+    ts: new Date().toISOString(),
+    kind: 'updater',
+    ...entry,
+  });
+}
+
 export async function appendParseErrorLog(entry: {
   context: string;
   url?: string;

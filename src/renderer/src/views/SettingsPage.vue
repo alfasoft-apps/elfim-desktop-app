@@ -23,7 +23,9 @@ const updateHint = computed(() => {
     case 'checking':
       return 'Checking for updates…';
     case 'not-available':
-      return 'No update available — you are on the latest version.';
+      return diagnostics.value?.appVersion
+        ? `No update available — installed v${diagnostics.value.appVersion} is the latest on GitHub.`
+        : 'No update available — you are on the latest version.';
     case 'available':
       return `Update available: v${s.version}. Downloading…`;
     case 'downloading':
@@ -31,7 +33,9 @@ const updateHint = computed(() => {
     case 'downloaded':
       return `Update downloaded (v${s.version}). Restart to install.`;
     case 'error':
-      return s.message;
+      return s.message.includes('auto-update') || s.message.length > 120
+        ? s.message
+        : `Update error: ${s.message}`;
     default:
       return null;
   }
