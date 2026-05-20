@@ -1,130 +1,129 @@
-# Fast release pipeline: compile once → Win + Mac package in parallel (no obfuscation in CI).
-
-name: Release desktop app
-
-on:
-  push:
-    branches:
-      - main
-      - master
-    tags:
-      - 'v*'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: desktop-release-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
-  CSC_IDENTITY_AUTO_DISCOVERY: false
-  ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
-  ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
-
-jobs:
-  compile:
-    name: Compile app (once)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-
-      - name: Release version
-        run: node -p "require('./package.json').version"
-
-      # Vite only — skip obfuscator in CI (~2–3 min saved per platform)
-      - run: npm run build:ci
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app-out
-          path: out/
-          retention-days: 1
-
-  build-windows:
-    name: Windows installer
-    needs: compile
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            .cache/electron
-            .cache/electron-builder
-          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - run: npm ci
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-out
-          path: out
-
-      - name: Package Windows + publish
-        run: npm run dist:win:publish
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: |
-            release/*.exe
-            release/*.exe.blockmap
-            release/latest.yml
-          if-no-files-found: error
-
-  build-macos:
-    name: macOS DMG + ZIP
-    needs: compile
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            .cache/electron
-            .cache/electron-builder
-          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - run: npm ci
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-out
-          path: out
-
-      # arm64 only on Apple Silicon runners — much faster than universal
-      - name: Package macOS + publish
-        run: npm run dist:mac:publish
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos-installer
-          path: |
-            release/*.dmg
-            release/*.zip
-            release/*.zip.blockmap
-            release/latest-mac.yml
-          if-no-files-found: error
-
+# Fast release pipeline: compile once → Win + Mac package in parallel (no obfuscation in CI).
+
+name: Release desktop app
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+  CSC_IDENTITY_AUTO_DISCOVERY: false
+  ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+  ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+  # GitHub Actions runtime (checkout, upload-artifact, etc.) — Node 20 deprecated mid-2026
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  compile:
+    name: Compile app (once)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Release version
+        run: node -p "require('./package.json').version"
+
+      - run: npm run build:ci
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-out
+          path: out/
+          retention-days: 1
+
+  build-windows:
+    name: Windows installer
+    needs: compile
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/electron
+            .cache/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-out
+          path: out
+
+      - name: Package Windows + publish
+        run: npm run dist:win:publish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+            release/latest.yml
+          if-no-files-found: error
+
+  build-macos:
+    name: macOS DMG + ZIP
+    needs: compile
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/electron
+            .cache/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-out
+          path: out
+
+      - name: Package macOS + publish
+        run: npm run dist:mac:publish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.zip.blockmap
+            release/latest-mac.yml
+          if-no-files-found: error

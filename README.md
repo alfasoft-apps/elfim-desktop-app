@@ -4,7 +4,7 @@ Desktop client for Elfim using **Electron**, **Vue 3**, **electron-vite**, and *
 
 ## Prerequisites
 
-- **Node.js** 20+ (includes npm)
+- **Node.js** 22+ (includes npm; CI uses 22)
 - **Windows**: Visual Studio Build Tools are only needed if you add native Node addons later; this scaffold does not require Rust.
 
 ## Setup
