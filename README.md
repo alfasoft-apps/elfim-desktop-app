@@ -42,8 +42,10 @@ When you push to `main` (or `master`), GitHub Actions builds Windows + macOS and
    git commit -m "chore: release 1.0.5"
    git push origin main
    ```
-3. Open **Actions** → **Release desktop app** and wait for both jobs to finish.
+3. Open **Actions** → **Release desktop app** and wait for all three jobs (**Compile** → **Windows** + **macOS** in parallel).
 4. The new release appears under **Releases** with tag/version from `package.json`.
+
+CI is optimized for speed: one shared compile, no obfuscation, macOS **arm64** only (Apple Silicon). Local `npm run build` still obfuscates; `npm run build:mac` still builds **universal** for full Mac support.
 
 Manual run: **Actions** → **Release desktop app** → **Run workflow**.
 
