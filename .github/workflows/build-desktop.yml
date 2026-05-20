@@ -1,0 +1,87 @@
+# Builds Windows + macOS and publishes a GitHub Release (version from package.json).
+# Trigger: push to main/master, push tag v*, or manual run.
+# Optional: set repo secret GH_TOKEN (PAT) if the default GITHUB_TOKEN cannot publish releases.
+
+name: Release desktop app
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Release version
+        run: node -p "require('./package.json').version"
+
+      - name: Build Windows + publish to GitHub Releases
+        run: npm run build:win:publish
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+            release/latest.yml
+          if-no-files-found: error
+
+  build-macos:
+    name: macOS DMG + ZIP
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Release version
+        run: node -p "require('./package.json').version"
+
+      - name: Build macOS + publish to GitHub Releases
+        run: npm run build:mac:publish
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.zip.blockmap
+            release/latest-mac.yml
+          if-no-files-found: error
