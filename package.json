@@ -11,6 +11,8 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build && node scripts/obfuscate-out.mjs",
     "build:ci": "electron-vite build",
+    "dist:win": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --config.compression=normal",
+    "dist:mac": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64 --config.compression=normal",
     "dist:win:publish": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --publish always --config.compression=normal",
     "dist:mac:publish": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --arm64 --publish always --config.compression=normal",
     "preview": "electron-vite preview",
@@ -104,7 +106,8 @@
     },
     "publish": {
       "provider": "github",
-      "releaseType": "release"
+      "releaseType": "release",
+      "vPrefixedTagName": false
     }
   }
 }
