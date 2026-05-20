@@ -50,7 +50,7 @@ jobs:
       - name: Build app bundle
         run: npm run build:ci
         env:
-          VITE_REST_API_ENDPOINT: https://admin.elfim.az/api
+          VITE_REST_API_ENDPOINT: ${{ secrets.VITE_REST_API_ENDPOINT }}
 
       - uses: actions/upload-artifact@v6
         with:

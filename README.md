@@ -51,6 +51,8 @@ Manual run: **Actions** → **Release desktop app** → **Run workflow**.
 
 If publish fails with permission errors, add a repo secret `GH_TOKEN` (fine-grained PAT with **Contents: Read and write** on this repo). Otherwise the workflow uses the built-in `GITHUB_TOKEN`.
 
+**CI API URL:** set repository secret `VITE_REST_API_ENDPOINT` (e.g. `https://admin.elfim.az/api`) under **Settings → Secrets and variables → Actions**. Local dev uses `.env.development` (not committed).
+
 `build:win` sets `CSC_IDENTITY_AUTO_DISCOVERY=false` so **unsigned** local builds do not pull optional signing tooling that can fail on Windows without symlink privileges (Developer Mode / elevated shell). Add real code signing later via your certificate and electron-builder docs when you publish.
 
 ## Environment
