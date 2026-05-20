@@ -13,6 +13,9 @@ import {
 import { logoutAndRedirectToLicenseGate } from '../utils/fingerprint-session-redirect';
 import { openLicenseConfigGatePage } from '../utils/license-config-gate';
 import { toIpcCloneable } from '../utils/ipc-serialize';
+import { resolveApiBaseUrl } from '../../../shared/api-base';
+
+const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_REST_API_ENDPOINT);
 
 const TOKEN_KEY = 'auth_token';
 
@@ -112,7 +115,7 @@ function pickAdapter(): AxiosAdapter | undefined {
 
 /** Axios müştərisi; bearer token `localStorage`-dadır. */
 const http = axios.create({
-  baseURL: import.meta.env.VITE_REST_API_ENDPOINT ?? '',
+  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     Accept: 'application/json',
@@ -122,8 +125,7 @@ const http = axios.create({
 });
 
 function sendErrorToBackend(error: unknown, context: Record<string, unknown> = {}): void {
-  const apiUrl = import.meta.env.VITE_REST_API_ENDPOINT ?? '';
-  if (!apiUrl) return;
+  const apiUrl = API_BASE_URL;
 
   const err = error instanceof Error ? error : new Error(String(error));
 

@@ -1,4 +1,7 @@
 /** Relativ şəkil yollarını tam URL-ə çevirir. */
+import { resolveApiBaseUrl } from '../../../shared/api-base';
+
+const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_REST_API_ENDPOINT);
 
 export function siteOriginFromApiBase(apiBase: string): string {
   const trimmed = apiBase.trim().replace(/\/+$/, '');
@@ -21,7 +24,7 @@ export function resolveImageUrl(raw: string | null | undefined): string | undefi
   } catch {
     /* ignore */
   }
-  const apiBase = import.meta.env.VITE_REST_API_ENDPOINT ?? '';
+  const apiBase = API_BASE_URL;
   const origin = siteOriginFromApiBase(apiBase);
   if (!origin) return undefined;
   if (s.startsWith('/')) return `${origin}${s}`;

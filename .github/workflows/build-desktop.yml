@@ -47,7 +47,10 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - run: npm run build:ci
+      - name: Build app bundle
+        run: npm run build:ci
+        env:
+          VITE_REST_API_ENDPOINT: https://admin.elfim.az/api
 
       - uses: actions/upload-artifact@v6
         with:
