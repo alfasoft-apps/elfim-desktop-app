@@ -127,7 +127,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    title: 'Elfim Auto v1.0.2',
+    title: 'Elfim Auto v1.0.3',
     ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
       preload: preloadScriptPath(),
