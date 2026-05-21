@@ -11,6 +11,8 @@ import AppBreadcrumb from './AppBreadcrumb.vue';
 import { useShoppingCartStore } from '../../stores/shoppingCart';
 import CacheSyncProgressBar from '../CacheSyncProgressBar.vue';
 import NetworkStatusBanner from '../NetworkStatusBanner.vue';
+import UpdateAvailableBanner from '../UpdateAvailableBanner.vue';
+import { useAutoUpdateStatus } from '../../composables/useAutoUpdateStatus';
 import { useAppDataCacheStore } from '../../stores/appDataCache';
 import { useNetworkStatusStore } from '../../stores/networkStatus';
 import { syncLicenseFingerprintFromSession } from '../../utils/license-fingerprint-sync';
@@ -51,6 +53,8 @@ const cartOpen = ref(false);
 
 const cart = useShoppingCartStore();
 cart.hydrateFromStorage();
+
+const { updatePhase, checkForUpdates, quitAndInstall } = useAutoUpdateStatus();
 
 onMounted(() => {
   networkStatus.startMonitoring();
@@ -93,6 +97,13 @@ watch(
 
 <template>
   <div class="flex min-h-screen flex-col bg-zinc-50 text-zinc-900 antialiased">
+    <UpdateAvailableBanner
+      v-if="showAppChrome"
+      :status="updatePhase"
+      @check="checkForUpdates"
+      @install="quitAndInstall"
+    />
+
     <header
       class="sticky top-0 z-30 flex min-h-14 shrink-0 flex-col justify-center gap-0.5 border-b border-zinc-200 bg-white/90 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/75"
     >
